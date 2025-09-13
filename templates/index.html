@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Analyze Plant - Complete Plant Health Analyzer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-4 mb-3">
+            <i class="fas fa-microscope text-success"></i> 
+            Advanced Plant Health Analysis
+        </h1>
+        <p class="lead text-muted">
+            Upload plant images for AI-powered disease detection and precise pesticide recommendations
+        </p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card result-card shadow-lg">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--primary-green), var(--secondary-green)); color: white;">
+                <h3 class="mb-0">
+                    <i class="fas fa-upload"></i> Image Analysis Portal
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <div class="upload-area mb-4" id="uploadArea">
+                        <div id="uploadPrompt">
+                            <i class="fas fa-cloud-upload-alt fa-4x mb-3" style="color: var(--primary-green);"></i>
+                            <h4 class="mb-3">Upload Plant Image</h4>
+                            <p class="text-muted mb-3">
+                                Drag and drop your image here, or click to browse
+                            </p>
+                            <p class="small text-muted mb-3">
+                                Supports: JPG, PNG, GIF, BMP, TIFF • Max size: 16MB
+                            </p>
+                            <button type="button" class="btn btn-success btn-lg btn-custom" 
+                                    onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-folder-open"></i> Choose Image File
+                            </button>
+                        </div>
+                        <input type="file" class="form-control" name="file" id="fileInput" 
+                               accept="image/*" required style="display: none;">
+                    </div>
+                    
+                    <div id="imagePreview" class="mb-4" style="display: none;">
+                        <div class="text-center">
+                            <h6><i class="fas fa-image"></i> Selected Image Preview:</h6>
+                            <img id="preview" class="img-fluid rounded shadow-sm" style="max-height: 300px;" alt="Image Preview"/>
+                            <p id="fileName" class="mt-2 text-muted"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" id="submitButton" class="btn btn-primary btn-lg btn-custom" style="display: none;">
+                            <span id="submitText"><i class="fas fa-cogs"></i> Analyze Now</span>
+                            <span id="loadingSpinner" style="display: none;">
+                                <span class="spinner-border spinner-border-sm"></span> Analyzing...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const uploadForm = document.getElementById('uploadForm');
+    const imagePreview = document.getElementById('imagePreview');
+    const preview = document.getElementById('preview');
+    const fileName = document.getElementById('fileName');
+    const submitButton = document.getElementById('submitButton');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+
+    // Handle file selection
+    const handleFile = (file) => {
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                fileName.textContent = `File: ${file.name}`;
+                submitButton.style.display = 'inline-block';
+                uploadPrompt.style.display = 'none'; // Hide the prompt
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // Click to upload
+    fileInput.addEventListener('change', () => {
+        handleFile(fileInput.files[0]);
+    });
+
+    // Drag and drop events
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        fileInput.files = e.dataTransfer.files; // Assign file to input
+        handleFile(file);
+    });
+
+    // Form submission: show spinner
+    uploadForm.addEventListener('submit', () => {
+        document.getElementById('submitText').style.display = 'none';
+        document.getElementById('loadingSpinner').style.display = 'inline-block';
+        submitButton.disabled = true;
+    });
+</script>
+{% endblock %}

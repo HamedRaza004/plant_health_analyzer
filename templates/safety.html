@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Pesticide Safety - Complete Plant Health Analyzer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-shield-alt text-success"></i> Pesticide Safety Guidelines
+        </h1>
+        <p class="lead text-muted">
+            Important information for safe and effective pesticide application.
+        </p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card result-card">
+            <div class="card-body p-4">
+                <div class="accordion" id="safetyAccordion">
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                <strong>1. Always Read the Label</strong>
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#safetyAccordion">
+                            <div class="accordion-body">
+                                The label is the law. It contains critical information about mixing, application, required personal protective equipment (PPE), and first aid. Never use a pesticide in a manner inconsistent with its labeling.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                <strong>2. Wear Personal Protective Equipment (PPE)</strong>
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#safetyAccordion">
+                            <div class="accordion-body">
+                                At a minimum, always wear long sleeves, long pants, closed-toe shoes, and chemical-resistant gloves. Depending on the product, you may also need eye protection (goggles), a respirator, or a chemical-resistant apron.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                <strong>3. Handle with Care</strong>
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#safetyAccordion">
+                            <div class="accordion-body">
+                                Mix pesticides in a well-ventilated area, away from children, pets, and food sources. Never eat, drink, or smoke while handling pesticides. Wash your hands thoroughly with soap and water after use and before using the restroom.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                <strong>4. Store and Dispose of Properly</strong>
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#safetyAccordion">
+                            <div class="accordion-body">
+                                Store pesticides in their original, labeled containers in a locked, secure cabinet away from extreme temperatures. Never pour leftover pesticides down the drain or into the storm sewer. Follow local guidelines for hazardous waste disposal.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="alert alert-danger mt-4">
+                    <strong>Disclaimer:</strong> This information is for general guidance only. Always refer to the product label and local agricultural extension services for specific instructions.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

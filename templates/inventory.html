@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Pesticide Inventory{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-boxes text-success"></i> Pesticide Inventory Management
+        </h1>
+        <p class="lead text-muted">
+            Add, view, and manage your pesticide stock.
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card result-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Add New Pesticide</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('add_pesticide') }}" method="post">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Pesticide Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="type" class="form-label">Type (e.g., Fungicide, Organic)</label>
+                        <input type="text" class="form-control" id="type" name="type">
+                    </div>
+                    <div class="mb-3">
+                        <label for="volume" class="form-label">Current Volume (in ml)</label>
+                        <input type="number" class="form-control" id="volume" name="volume" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="targets" class="form-label">Target Keywords</label>
+                        <textarea class="form-control" id="targets" name="targets" rows="3" placeholder="e.g., blight, rust, mildew, spot"></textarea>
+                        <div class="form-text">Comma-separated keywords from disease names.</div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Add to Inventory</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card result-card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list-ul"></i> Current Stock</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Volume (ml)</th>
+                                <th>Targets</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in inventory %}
+                            <tr>
+                                <td><strong>{{ p.name }}</strong></td>
+                                <td><span class="badge bg-secondary">{{ p.type }}</span></td>
+                                <td>{{ p.volume }}</td>
+                                <td class="small">{{ p.targets }}</td>
+                                <td>
+                                    <a href="{{ url_for('delete_pesticide', pesticide_id=p.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Your inventory is empty. Add a pesticide to get started.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

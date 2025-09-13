@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - {{ result.status }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-poll-h text-success"></i> Analysis Complete
+        </h1>
+        <p class="lead text-muted">
+            Detailed results for <strong>{{ original_filename }}</strong>
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card result-card h-100">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0"><i class="fas fa-images"></i> Image Analysis</h4>
+            </div>
+            <div class="card-body">
+                <div class="image-comparison">
+                    <div class="text-center">
+                        <h5>Original Image</h5>
+                        <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="Original Image" class="img-fluid">
+                    </div>
+                    <div class="text-center">
+                        <h5>Processed Image</h5>
+                        <img src="{{ url_for('static', filename='processed/' + processed_filename) }}" alt="Processed Image" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card result-card h-100">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--primary-green), var(--secondary-green)); color: white;">
+                <h4 class="mb-0"><i class="fas fa-clipboard-check"></i> Detection Results</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+    <h5 class="text-muted">Status</h5>
+    <h2 class="fw-bold status-{{ result.status.lower().replace(' ', '-') }}">{{ result.status }}</h2>
+    <p class="small text-muted mb-0">AI Confidence: {{ result.confidence }}%</p>
+</div>
+
+<div class="mb-4">
+    <h5 class="text-muted">Plant Health Index</h5>
+    {% set urgency = result.application_urgency %}
+    {% if urgency == 'none' %}
+        {% set health_percent = 100 %}
+        {% set health_color = 'bg-success' %}
+        {% set health_text = 'Excellent' %}
+    {% elif urgency == 'low' %}
+        {% set health_percent = 75 %}
+        {% set health_color = 'bg-info' %}
+        {% set health_text = 'Fair' %}
+    {% elif urgency == 'medium' %}
+        {% set health_percent = 50 %}
+        {% set health_color = 'bg-warning' %}
+        {% set health_text = 'Poor' %}
+    {% elif urgency == 'high' %}
+        {% set health_percent = 25 %}
+        {% set health_color = 'bg-danger' %}
+        {% set health_text = 'Critical' %}
+    {% else %} {# urgent #}
+        {% set health_percent = 10 %}
+        {% set health_color = 'bg-dark' %}
+        {% set health_text = 'Urgent Action' %}
+    {% endif %}
+
+    <div class="progress progress-custom" style="height: 25px;">
+        <div class="progress-bar {{ health_color }}" role="progressbar" style="width: {{ health_percent }}%;" aria-valuenow="{{ health_percent }}">
+            <strong class="h5">{{ health_text }}</strong>
+        </div>
+    </div>
+</div>
+
+                <div class="mb-4">
+                    <h5 class="text-muted">Action Urgency</h5>
+                    <h4>
+                        <span class="badge urgency-{{ result.application_urgency }} urgency-badge text-uppercase">
+                            {{ result.application_urgency }}
+                        </span>
+                    </h4>
+                </div>
+
+
+            <div>
+                <h5 class="text-muted"><i class="fas fa-lightbulb"></i> General Recommendations</h5>
+                <ul class="list-group list-group-flush mb-4">
+                    {% for recommendation in result.recommendations %}
+                    <li class="list-group-item">
+                        <i class="fas fa-check-circle text-success me-2"></i>{{ recommendation }}
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <h5 class="text-muted"><i class="fas fa-syringe"></i> Suitable Treatments from Your Inventory</h5>
+                {% if result.suitable_pesticides %}
+                    {% for p in result.suitable_pesticides %}
+                    <div class="card mb-3 bg-light border">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">{{ p.name }} <span class="badge bg-info">{{ p.type }}</span></h6>
+                                    <p class="card-text mb-0">
+                                        <small>Recommended Dose: <strong>{{ p.recommended_amount }} ml</strong>. Stock: {{ p.volume }} ml.</small>
+                                    </p>
+                                </div>
+                                <div>
+                                    <form action="{{ url_for('confirm_treatment') }}" method="post" class="d-inline">
+                                        <input type="hidden" name="analysis_id" value="{{ analysis_id }}">
+                                        <input type="hidden" name="pesticide_id" value="{{ p.id }}">
+                                        <input type="hidden" name="amount_sprayed" value="{{ p.recommended_amount }}">
+                                        <button type="submit" class="btn btn-sm btn-primary">Confirm & Use</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-warning">
+                        No suitable pesticides found in your inventory for this disease, or you are out of stock.
+                    </div>
+                {% endif %}
+            </div>
+
+        </div> <div class="card-footer text-center">
+            ... (The "Analyze Another" and "View Dashboard" buttons are here) ...
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('index') }}" class="btn btn-success btn-custom">
+                    <i class="fas fa-camera"></i> Analyze Another
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-info btn-custom text-white">
+                    <i class="fas fa-chart-bar"></i> View Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

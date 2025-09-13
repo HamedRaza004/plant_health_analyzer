@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Detailed Analytics - Complete Plant Health Analyzer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-chart-line text-success"></i> Detailed Analytics
+        </h1>
+        <p class="lead text-muted">
+            In-depth visualization of analysis data.
+        </p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card result-card h-100">
+            <div class="card-header">
+                <h5><i class="fas fa-pie-chart"></i> Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card result-card h-100">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Urgency Levels</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="urgencyChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 mt-4">
+        <div class="card result-card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-alt"></i> Daily Analysis Activity (Last 30 Days)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="dailyActivityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Data from Flask
+    const statusData = {{ analytics.status_distribution | tojson }};
+    const urgencyData = {{ analytics.urgency_distribution | tojson }};
+    const dailyActivity = {{ analytics.daily_activity | tojson }};
+    
+    // Chart Colors
+    const chartColors = ['#28a745', '#ffc107', '#dc3545', '#17a2b8', '#6f42c1', '#fd7e14'];
+
+    // Status Chart
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(statusData),
+            datasets: [{
+                label: 'Number of Analyses',
+                data: Object.values(statusData),
+                backgroundColor: chartColors,
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // Urgency Chart
+    const urgencyCtx = document.getElementById('urgencyChart').getContext('2d');
+    new Chart(urgencyCtx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(urgencyData),
+            datasets: [{
+                data: Object.values(urgencyData),
+                backgroundColor: chartColors.slice().reverse(),
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // Daily Activity Chart
+    const dailyActivityCtx = document.getElementById('dailyActivityChart').getContext('2d');
+    new Chart(dailyActivityCtx, {
+        type: 'line',
+        data: {
+            labels: dailyActivity.map(d => d[0]),
+            datasets: [{
+                label: 'Analyses per Day',
+                data: dailyActivity.map(d => d[1]),
+                borderColor: 'var(--primary-green)',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
+{% endblock %}

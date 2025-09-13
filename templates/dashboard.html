@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Complete Plant Health Analyzer{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-5 mb-3">
+            <i class="fas fa-tachometer-alt text-success"></i> Analytics Dashboard
+        </h1>
+        <p class="lead text-muted">
+            Overview of all plant health analyses and trends.
+        </p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card analytics-card shadow-sm h-100 bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-flask fa-3x mb-3"></i>
+                <h2 class="display-5 fw-bold">{{ analytics.total_analyses }}</h2>
+                <h5 class="card-title">Total Analyses</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card analytics-card shadow-sm h-100" style="background-color: var(--secondary-green); color: white;">
+            <div class="card-body text-center">
+                <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                <h2 class="display-5 fw-bold">{{ analytics.total_pesticide_saved }} ml</h2>
+                <h5 class="card-title">Pesticide Saved</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card analytics-card shadow-sm h-100 bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-crosshairs fa-3x mb-3"></i>
+                <h2 class="display-5 fw-bold">{{ analytics.avg_confidence }}%</h2>
+                <h5 class="card-title">Avg. Confidence</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card analytics-card shadow-sm h-100 bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-heartbeat fa-3x mb-3"></i>
+                <h2 class="display-5 fw-bold">{{ analytics.health_rate }}%</h2>
+                <h5 class="card-title">Overall Health Rate</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-6">
+        <div class="card result-card h-100">
+            <div class="card-header">
+                <h5><i class="fas fa-pie-chart"></i> Status Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card result-card h-100">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Urgency Levels</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="urgencyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card result-card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Recent Analysis History</h5>
+                    <a href="{{ url_for('export_data') }}" class="btn btn-sm btn-outline-success">
+                        <i class="fas fa-download"></i> Export All Data (CSV)
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if history %}
+                    <div class="list-group">
+                    {% for item in history %}
+                        <div class="history-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="text-primary">{{ item.filename }}</strong><br>
+                                <small class="text-muted">{{ item.timestamp | striptags | safe | truncate(19) }}</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-info me-2">{{ item.confidence }}% Conf.</span>
+                                <span class="badge urgency-{{ item.urgency }} text-uppercase">{{ item.urgency }}</span>
+                            </div>
+                            <div class="fw-bold status-{{ item.status.lower().replace(' ', '-') }}">
+                                {{ item.status }}
+                            </div>
+                            <a href="{{ url_for('delete_analysis', analysis_id=item.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this record?');">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted">No analysis history found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Data from Flask
+    const statusData = {{ analytics.status_distribution | tojson }};
+    const urgencyData = {{ analytics.urgency_distribution | tojson }};
+
+    // --- 1. MODIFIED: Status Chart is now a Radar Chart ---
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'radar', // Changed from 'pie' to 'radar'
+        data: {
+            labels: Object.keys(statusData),
+            datasets: [{
+                label: 'Analyses Count',
+                data: Object.values(statusData),
+                fill: true,
+                backgroundColor: 'rgba(40, 167, 69, 0.2)', // Semi-transparent fill
+                borderColor: 'rgba(40, 167, 69, 1)',      // Solid line
+                pointBackgroundColor: 'rgba(40, 167, 69, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(40, 167, 69, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false // Hiding legend for a cleaner look
+                }
+            },
+            // Customizing the scale for the radar chart
+            scales: {
+                r: {
+                    angleLines: {
+                        display: true
+                    },
+                    suggestedMin: 0
+                }
+            }
+        }
+    });
+
+    // --- 2. MODIFIED: Urgency Chart is now a Horizontal Bar Chart ---
+    const urgencyCtx = document.getElementById('urgencyChart').getContext('2d');
+    
+    // Create a gradient for the bars
+    const urgencyGradient = urgencyCtx.createLinearGradient(0, 0, 500, 0); // Left-to-right gradient
+    urgencyGradient.addColorStop(0, 'rgba(255, 193, 7, 0.5)');  // Start color (yellow)
+    urgencyGradient.addColorStop(1, 'rgba(220, 53, 69, 0.8)'); // End color (red)
+
+    new Chart(urgencyCtx, {
+        type: 'bar', // This remains 'bar'
+        data: {
+            labels: Object.keys(urgencyData),
+            datasets: [{
+                label: 'Cases',
+                data: Object.values(urgencyData),
+                backgroundColor: urgencyGradient,
+                borderColor: 'rgba(220, 53, 69, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y', // This is the key to making the bar chart horizontal
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

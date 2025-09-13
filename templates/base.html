@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Plant Health Analyzer {% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #00695c; /* A slightly lighter, modern teal */
+            --secondary-green: #00897b;
+            --danger-red: #dc3545;
+            --warning-yellow: #ffc107;
+            --info-blue: #17a2b8;
+        }
+        
+        body {
+            background-color: #f4f7f6; /* A softer, off-white background */
+            color: #444; /* A darker gray for better readability */
+            font-family: 'Lato', sans-serif; /* Use Lato for all body text */
+        }
+
+        /* Use the more stylish Poppins for all headings */
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .navbar {
+            background-color: #004d40 !important; /* A deep, sophisticated teal-green */
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .upload-area {
+            border: 3px dashed var(--primary-green);
+            border-radius: 15px;
+            padding: 50px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-color: var(--secondary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.15);
+        }
+        
+        .upload-area.dragover {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-color: var(--primary-green);
+        }
+        
+        /* Status styling */
+        .status-healthy { color: var(--primary-green) !important; }
+        .status-slightly-diseased { color: #fd7e14 !important; }
+        .status-moderately-diseased { color: #e83e8c !important; }
+        .status-severely-diseased { color: var(--danger-red) !important; }
+        .status-critically-diseased { color: #721c24 !important; }
+        .status-unclear-analysis { color: var(--warning-yellow) !important; }
+        
+        /* Cards and components */
+        /* A more subtle, modern shadow for cards */
+        .result-card, .analytics-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease-in-out; /* Smooth transition for all changes */
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        /* A "lift" effect on hover */
+        .result-card:hover, .analytics-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .progress-custom {
+            height: 12px;
+            border-radius: 10px;
+            background-color: #e9ecef;
+        }
+        
+        .progress-custom .progress-bar {
+            border-radius: 10px;
+        }
+        
+        .urgency-badge {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .urgency-none { background-color: var(--primary-green); }
+        .urgency-low { background-color: var(--info-blue); }
+        .urgency-medium { background-color: var(--warning-yellow); color: #212529; }
+        .urgency-high { background-color: #fd7e14; }
+        .urgency-urgent { background-color: var(--danger-red); animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .comparison-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        
+        .btn-custom {
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+            color: white;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .history-item {
+            transition: all 0.2s ease;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #e9ecef;
+        }
+        
+        .history-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+            border-color: var(--primary-green);
+        }
+        
+        .image-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .image-comparison img {
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .image-comparison img:hover {
+            transform: scale(1.02);
+        }
+        
+        @media (max-width: 768px) {
+            .image-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .upload-area {
+                padding: 30px 15px;
+            }
+        }
+
+        /* Make buttons feel more interactive */
+        .btn {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-success {
+            background-color: var(--primary-green);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #004d40; /* Darken on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--primary-green);">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-seedling"></i> Plant Health Analyzer
+                <small class="badge bg-light text-dark ms-2">Complete MVP</small>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-camera"></i> Analyze
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-chart-bar"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('analytics_page') }}">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('history_page') }}">
+                            <i class="fas fa-history"></i> History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('safety_info') }}">
+                            <i class="fas fa-shield-alt"></i> Safety
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('inventory') }}">
+                            <i class="fas fa-boxes"></i> Inventory
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid py-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' if category == 'success' else 'info' }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }}"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-leaf"></i> Plant Health Analyzer</h6>
+                    <p class="small text-muted">Intelligent Pesticide Management System - Complete MVP</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="small text-muted">
+                        Advanced Computer Vision • Hugging Face AI • Precision Agriculture
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
