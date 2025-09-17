@@ -6,3 +6,4 @@ transformers
 torch
 torchvision
 matplotlib
+gunicorn
