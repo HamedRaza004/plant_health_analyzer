@@ -741,5 +741,14 @@ def export_data():
         return redirect(url_for('dashboard'))
 
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    # Render provides PORT env var
+    port = int(os.environ.get("PORT", 5000))
+    # Detect environment: Render sets RENDER env var automatically
+    is_render = os.environ.get("RENDER") is not None
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=not is_render  # Debug only when not on Render
+    )
